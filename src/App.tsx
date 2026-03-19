@@ -6,11 +6,18 @@ import { ColorControls } from './components/controls/ColorControls';
 import { TypographyControls } from './components/controls/TypographyControls';
 import { SpacingControls } from './components/controls/SpacingControls';
 import { ShadowControls } from './components/controls/ShadowControls';
+import { ContrastChecker } from './components/controls/ContrastChecker';
 import { ComponentPreview } from './components/preview/ComponentPreview';
 import { SavedThemes } from './components/SavedThemes';
 import type { OutputFormat } from './types';
 
-type ControlTab = 'color' | 'typography' | 'spacing' | 'shadows' | 'saved';
+type ControlTab =
+  | 'color'
+  | 'typography'
+  | 'spacing'
+  | 'shadows'
+  | 'contrast'
+  | 'saved';
 type LeftTab = 'controls' | 'output';
 
 const OUTPUT_FORMATS: { id: OutputFormat; label: string }[] = [
@@ -51,6 +58,7 @@ export default function App() {
     setSpacingUnit,
     setShadow,
     setRadius,
+    setSemanticColor,
     undo,
     redo,
     canUndo,
@@ -100,6 +108,7 @@ export default function App() {
     { id: 'typography', label: 'Type' },
     { id: 'spacing', label: 'Space' },
     { id: 'shadows', label: 'Shadow' },
+    { id: 'contrast', label: 'Contrast' },
     { id: 'saved', label: 'Saved' },
   ];
 
@@ -213,6 +222,12 @@ export default function App() {
                 )}
                 {controlTab === 'shadows' && (
                   <ShadowControls theme={theme} onShadow={setShadow} />
+                )}
+                {controlTab === 'contrast' && (
+                  <ContrastChecker
+                    theme={theme}
+                    onFix={(key, hex, mode) => setSemanticColor(key, hex, mode)}
+                  />
                 )}
                 {controlTab === 'saved' && (
                   <SavedThemes

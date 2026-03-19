@@ -36,6 +36,12 @@ type Action =
       value: number;
     }
   | { type: 'SET_THEME'; theme: ChromaticTheme }
+  | {
+      type: 'SET_SEMANTIC_COLOR';
+      key: string;
+      hex: string;
+      mode: 'light' | 'dark';
+    }
   | { type: 'UNDO' }
   | { type: 'REDO' };
 
@@ -53,11 +59,6 @@ function applyAction(theme: ChromaticTheme, action: Action): ChromaticTheme {
         theme.harmonyType,
       );
       const accentScale = generateScale(accentHex);
-      const semantic = deriveSemanticColors(
-        brandScale,
-        neutralScale,
-        theme.darkMode,
-      );
       return {
         ...theme,
         brandColor: action.hex,
@@ -65,7 +66,8 @@ function applyAction(theme: ChromaticTheme, action: Action): ChromaticTheme {
           brand: brandScale,
           accent: accentScale,
           neutral: neutralScale,
-          semantic,
+          semanticLight: deriveSemanticColors(brandScale, neutralScale, false),
+          semanticDark: deriveSemanticColors(brandScale, neutralScale, true),
         },
       };
     }
@@ -83,18 +85,8 @@ function applyAction(theme: ChromaticTheme, action: Action): ChromaticTheme {
       };
     }
 
-    case 'SET_DARK_MODE': {
-      const semantic = deriveSemanticColors(
-        theme.colors.brand,
-        theme.colors.neutral,
-        action.darkMode,
-      );
-      return {
-        ...theme,
-        darkMode: action.darkMode,
-        colors: { ...theme.colors, semantic },
-      };
-    }
+    case 'SET_DARK_MODE':
+      return { ...theme, darkMode: action.darkMode };
 
     case 'SET_FONT_FAMILY':
       return {
@@ -137,6 +129,20 @@ function applyAction(theme: ChromaticTheme, action: Action): ChromaticTheme {
 
     case 'SET_THEME':
       return action.theme;
+
+    case 'SET_SEMANTIC_COLOR': {
+      const setKey = action.mode === 'light' ? 'semanticLight' : 'semanticDark';
+      return {
+        ...theme,
+        colors: {
+          ...theme.colors,
+          [setKey]: {
+            ...theme.colors[setKey],
+            [action.key]: action.hex,
+          },
+        },
+      };
+    }
 
     default:
       return theme;
@@ -263,6 +269,12 @@ export function useTheme() {
     [],
   );
 
+  const setSemanticColor = useCallback(
+    (key: string, hex: string, mode: 'light' | 'dark') =>
+      dispatch({ type: 'SET_SEMANTIC_COLOR', key, hex, mode }),
+    [],
+  );
+
   const undo = useCallback(() => dispatch({ type: 'UNDO' }), []);
   const redo = useCallback(() => dispatch({ type: 'REDO' }), []);
 
@@ -309,6 +321,7 @@ export function useTheme() {
     setSpacingUnit,
     setShadow,
     setRadius,
+    setSemanticColor,
     undo,
     redo,
     canUndo,

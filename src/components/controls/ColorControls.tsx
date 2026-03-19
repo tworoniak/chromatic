@@ -50,6 +50,9 @@ function ScaleRow({ scale, label }: { scale: ColorScale; label: string }) {
 }
 
 export function ColorControls({ theme, onBrandColor, onHarmony }: Props) {
+  const semantic = theme.darkMode
+    ? theme.colors.semanticDark
+    : theme.colors.semanticLight;
   return (
     <div className='flex flex-col gap-5'>
       {/* Brand color picker */}
@@ -112,7 +115,7 @@ export function ColorControls({ theme, onBrandColor, onHarmony }: Props) {
           Semantic Colors
         </label>
         <div className='grid grid-cols-2 gap-1.5'>
-          {Object.entries(theme.colors.semantic).map(([key, value]) => (
+          {Object.entries(semantic).map(([key, value]) => (
             <div
               key={key}
               className='flex items-center gap-2 px-2 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800'
