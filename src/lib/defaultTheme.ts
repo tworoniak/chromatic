@@ -11,7 +11,6 @@ const brandScale = generateScale(brandHex);
 const neutralScale = generateNeutral(brandHex);
 const { accent: accentHex } = generateHarmony(brandHex, 'complementary');
 const accentScale = generateScale(accentHex);
-const semantic = deriveSemanticColors(brandScale, neutralScale, false);
 
 export const defaultTheme: ChromaticTheme = {
   name: 'Default',
@@ -21,7 +20,8 @@ export const defaultTheme: ChromaticTheme = {
     brand: brandScale,
     accent: accentScale,
     neutral: neutralScale,
-    semantic,
+    semanticLight: deriveSemanticColors(brandScale, neutralScale, false),
+    semanticDark: deriveSemanticColors(brandScale, neutralScale, true),
   },
   typography: {
     fontFamily: 'Inter, system-ui, sans-serif',

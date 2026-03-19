@@ -1,4 +1,5 @@
 import type { ColorScale, HarmonyType } from '../types';
+import type { SemanticColors } from '../types';
 
 // ─── HSL utilities ─────────────────────────────────────────────────────────
 
@@ -109,8 +110,8 @@ export function generateNeutral(hex: string): ColorScale {
 // ─── Contrast checker ──────────────────────────────────────────────────────
 
 export function getContrastColor(hex: string): '#ffffff' | '#18181b' {
-  const { l } = hexToHSL(hex);
-  return l > 55 ? '#18181b' : '#ffffff';
+  const luminance = getLuminance(hex);
+  return luminance > 0.179 ? '#18181b' : '#ffffff';
 }
 
 // ─── Semantic derivation ───────────────────────────────────────────────────
@@ -119,7 +120,7 @@ export function deriveSemanticColors(
   brand: ColorScale,
   neutral: ColorScale,
   darkMode: boolean,
-) {
+): SemanticColors {
   if (darkMode) {
     return {
       primary: brand['400'],
@@ -146,4 +147,24 @@ export function deriveSemanticColors(
     warning: '#f59e0b',
     success: '#22c55e',
   };
+}
+
+export function getLuminance(hex: string): number {
+  if (!hex.startsWith('#') || hex.length < 7) return 0;
+  const r = parseInt(hex.slice(1, 3), 16) / 255;
+  const g = parseInt(hex.slice(3, 5), 16) / 255;
+  const b = parseInt(hex.slice(5, 7), 16) / 255;
+
+  const linearize = (c: number) =>
+    c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+
+  return 0.2126 * linearize(r) + 0.7152 * linearize(g) + 0.0722 * linearize(b);
+}
+
+export function getContrastRatio(hex1: string, hex2: string): number {
+  const l1 = getLuminance(hex1);
+  const l2 = getLuminance(hex2);
+  const lighter = Math.max(l1, l2);
+  const darker = Math.min(l1, l2);
+  return Math.round(((lighter + 0.05) / (darker + 0.05)) * 10) / 10;
 }

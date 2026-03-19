@@ -1,73 +1,202 @@
-# React + TypeScript + Vite
+# Chromatic
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A visual theme builder that generates fully WCAG-compliant design token sets for light and dark mode. Pick a brand color, choose a harmony type, tune typography and spacing, verify contrast compliance — then export to CSS, SCSS, TypeScript, or Tailwind.
 
-Currently, two official plugins are available:
+Built with React, TypeScript, Tailwind CSS, and Vite. The token transformation engine is shared with the [Design Token Pipeline](https://github.com/your-username/design-token-pipeline) project.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## Purpose
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Most theme builders stop at color pickers. Chromatic goes further by treating a theme as a structured token system — brand scale, accent scale, neutral scale, semantic mappings, typography, spacing, shadows — and then validating the result against WCAG 2.1 contrast requirements before export.
 
-## Expanding the ESLint configuration
+The key insight is that light and dark mode semantic colors need to be maintained as separate, independently validated sets. A single `primary` value that passes contrast on a white background will almost certainly fail on a dark one, and vice versa. Chromatic makes this explicit.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Features
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Color System
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- **Brand color picker** — select any hex color as the brand base
+- **Auto-generated scales** — derives a full 50–900 scale for brand, accent, and neutral using HSL lightness stepping with saturation modulation at the extremes
+- **Harmony types** — generates an accent color using one of four color theory relationships: complementary (180°), analogous (±30°), triadic (120°), or split-complementary (150°/210°)
+- **Separate light and dark semantic sets** — `semanticLight` and `semanticDark` are maintained independently so fixes in one mode never break the other
+- **Smart accent text** — uses WCAG relative luminance (not HSL lightness) to determine whether white or dark text has better contrast on the accent color
+
+### Typography
+
+- **Google Fonts picker** — searchable font list for both sans and mono families, loaded dynamically via the Google Fonts API
+- **Base size slider** — 12–20px, drives the full type scale via fixed multipliers
+
+### Spacing & Shape
+
+- **Base unit slider** — 2–8px base unit generates the full spacing scale (×1 through ×16)
+- **Border radius controls** — per-level sliders for sm, md, lg, xl
+
+### Shadows
+
+- **Per-level controls** — offsetY, blur, and opacity sliders for sm, md, lg, xl elevations
+- **Live preview cards** — each level rendered on a light background so shadows are always visible
+
+### Component Preview
+
+A live style guide rendered entirely from CSS custom properties injected into the document — no React re-renders required for theme changes:
+
+- Typography specimens (headings, body, muted, code)
+- Buttons (primary, secondary, ghost, destructive, accent, small, large, disabled)
+- Form inputs (text, textarea, checkbox)
+- Badges and alert banners (primary, success, warning, error, accent)
+- Color palette swatches for brand, accent, and neutral scales
+- Shadow showcase cards
+- **Light/dark toggle** — switches the preview between `semanticLight` and `semanticDark` instantly
+
+### WCAG Contrast Checker
+
+- **14 semantic color pairs** checked automatically — text, muted text, primary, buttons, badges, borders
+- **WCAG 2.1 algorithm** — proper relative luminance calculation per the spec
+- **Three tiers** — AA (≥4.5:1), AA-large (≥3:1), AAA (≥7:1)
+- **Light/dark mode toggle** — audit each semantic set independently
+- **Suggest Fix** — per failing pair, walks HSL lightness in the correct direction until 4.5:1 is achieved, shows a before/after swatch and new ratio
+- **Apply** — one click writes the fix to the correct semantic set (light or dark) without affecting the other
+- **Luminance-based contrast text** — uses `(L + 0.05) / (L2 + 0.05)` and a 0.179 luminance threshold to determine correct text color for accent/warning/success backgrounds, correctly handling tricky yellow-green hues that fool HSL-based approaches
+
+### Undo / Redo
+
+Full history stack via `useReducer` — every theme change is undoable, including contrast fixes.
+
+### Save / Load
+
+Named themes persisted to `localStorage` with save date. Load any saved theme back into the editor instantly.
+
+### Token Output
+
+Four export formats generated by the shared pipeline engine:
+
+- **CSS** — `:root {}` with light semantics, `[data-dark="true"] {}` with dark semantics
+- **SCSS** — flat variable declarations for both sets
+- **TypeScript** — `as const` object with `TokenKey` type export
+- **Tailwind** — typed `Config` with tokens sorted into `theme.extend` buckets
+
+Copy to clipboard or download with the correct file extension.
+
+---
+
+## Tech Stack
+
+| Tool                  | Purpose                          |
+| --------------------- | -------------------------------- |
+| React 18 + TypeScript | UI and type safety               |
+| Vite                  | Dev server and bundler           |
+| Tailwind CSS v4       | App chrome styling               |
+| Google Fonts API      | Dynamic font loading             |
+| Web Crypto API        | UUID generation for saved themes |
+
+No external color or token libraries — HSL math, scale generation, harmony derivation, luminance calculation, and WCAG contrast checking are all implemented from scratch.
+
+---
+
+## Getting Started
+
+```bash
+git clone https://github.com/your-username/chromatic
+cd chromatic
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Project Structure
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
 ```
+src/
+├── App.tsx                              # Root layout — left panel, preview, state wiring
+├── types/
+│   └── index.ts                         # ChromaticTheme, SemanticColors, ColorScale,
+│                                        # ThemeHistory, SavedTheme, pipeline types
+├── lib/
+│   ├── colorUtils.ts                    # HSL↔hex, scale generation, harmony derivation,
+│                                        # neutral generation, luminance, contrast ratio,
+│                                        # getContrastColor (luminance-based)
+│   ├── contrastUtils.ts                 # WCAG pair checking, fix suggestion, FIX_MAP
+│   ├── defaultTheme.ts                  # Seeded indigo theme with both semantic sets
+│   ├── themeToCSS.ts                    # Injects CSS custom properties to document
+│   └── themeToTokens.ts                 # Converts ChromaticTheme to pipeline TokenSet
+├── pipeline/                            # Shared from design-token-pipeline project
+│   ├── index.ts                         # Orchestrator
+│   ├── resolve.ts                       # Alias resolution
+│   ├── transform.ts                     # Type-aware value transformation
+│   └── generators.ts                    # CSS, SCSS, TypeScript, Tailwind generators
+├── hooks/
+│   ├── useTheme.ts                      # useReducer history, all theme actions, save/load
+│   └── useGoogleFonts.ts               # Font search, dynamic <link> injection
+└── components/
+    ├── controls/
+    │   ├── ColorControls.tsx            # Brand picker, scale display, harmony selector,
+    │   │                                # semantic color grid
+    │   ├── TypographyControls.tsx       # Google Fonts picker (sans + mono), base size
+    │   ├── SpacingControls.tsx          # Base unit slider, scale preview, border radius
+    │   ├── ShadowControls.tsx           # Per-level sliders with live card preview
+    │   └── ContrastChecker.tsx          # WCAG audit panel with light/dark toggle and fixes
+    ├── preview/
+    │   └── ComponentPreview.tsx         # Full component style guide driven by CSS vars
+    └── SavedThemes.tsx                  # Save input, theme list, load/delete
+```
+
+---
+
+## Architecture
+
+### Separate Light and Dark Semantic Sets
+
+`ChromaticTheme.colors` contains `semanticLight` and `semanticDark` as independent objects. `deriveSemanticColors(brand, neutral, darkMode)` seeds both on mount and whenever the brand color changes. The active set is derived in the hook as `theme.darkMode ? colors.semanticDark : colors.semanticLight`.
+
+The `SET_SEMANTIC_COLOR` action accepts a `mode: 'light' | 'dark'` parameter and writes only to the corresponding set. This means a contrast fix in dark mode has zero effect on light mode tokens, and vice versa.
+
+### CSS Custom Property Injection
+
+`injectThemeCSS` writes a `<style id="chromatic-theme">` tag to `document.head` on every theme change. The light semantic vars live in `.chromatic-preview` and the dark vars override them in `.chromatic-preview[data-dark="true"]`. The component preview div carries the `data-dark` attribute when dark mode is active. This means the entire preview re-themes via a single attribute toggle with no React re-renders.
+
+### WCAG Contrast Fix Algorithm
+
+`suggestFix` identifies the adjustable color in a failing pair via `FIX_MAP`, then walks HSL lightness in 1° steps toward 0 or 100 until `getContrastRatio` returns ≥4.5. The direction is determined by the other color's lightness — if the background is light, darken the foreground; if the background is dark, lighten it. The loop runs a maximum of 100 iterations, capped at the HSL lightness range.
+
+`getContrastColor` uses relative luminance with the mathematically correct 0.179 threshold — the luminance value at which white and dark text achieve equal contrast — rather than HSL lightness. This correctly handles yellow-green and other high-chroma colors that appear dark in HSL but are perceptually bright.
+
+### Pipeline Reuse
+
+`themeToTokens` converts a `ChromaticTheme` into a W3C DTCG-compatible `TokenSet`, which is passed directly to `runPipeline` from the shared pipeline module. The four output generators run unchanged — Chromatic contributes only the token data, not the transformation logic.
+
+---
+
+## Scripts
+
+```bash
+npm run dev        # Start Vite dev server
+npm run build      # Production build
+npm run preview    # Preview production build locally
+npm run lint       # ESLint
+```
+
+---
+
+## What I Learned
+
+The hardest problem was WCAG contrast compliance across both light and dark modes simultaneously. The naive approach — a single semantic color set that swaps on mode toggle — means any contrast fix for light mode breaks dark mode and vice versa. Separating `semanticLight` and `semanticDark` into independent objects solved this cleanly, and scoping the `SET_SEMANTIC_COLOR` action to a specific mode meant the fix UI could target the right set without any additional complexity.
+
+The luminance-based `getContrastColor` fix was the most instructive debugging session. HSL lightness of ~42% reads as "dark" and returns white text — but `#c5c112` (yellow-green) has a relative luminance of ~0.45, well above the 0.179 crossover, meaning dark text is always the correct choice. The WCAG spec uses luminance, not lightness, for exactly this reason, and implementing it correctly required understanding why the two diverge for high-chroma hues.
+
+Reusing the pipeline module from the Design Token Pipeline project validated the decision to build it as a standalone, framework-agnostic module. Dropping `src/pipeline/` into Chromatic required zero modifications — the same resolver, transformer, and generators consumed the new token shape without any changes.
+
+---
+
+## Related Projects
+
+This is part of a series of frontend experiment projects exploring real tradeoffs in the React ecosystem:
+
+- **Chromatic** ← you are here
+- Design Token Pipeline — W3C DTCG token transformation, alias resolution, 4 output formats
+- State Management Comparison — Zustand vs. Jotai vs. Redux Toolkit
+- Virtual List Renderer — from-scratch virtual rendering, 100k rows at 60fps
+- UI Design Systems Comparison — shadcn/ui vs. Radix vs. Material UI

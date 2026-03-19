@@ -6,7 +6,9 @@ interface Props {
 }
 
 export function ComponentPreview({ theme, onDarkMode }: Props) {
-  const { semantic } = theme.colors; // brand
+  const semantic = theme.darkMode
+    ? theme.colors.semanticDark
+    : theme.colors.semanticLight;
   const { borderRadius, shadows } = theme;
   const u = theme.spacing.baseUnit;
 
@@ -90,6 +92,7 @@ export function ComponentPreview({ theme, onDarkMode }: Props) {
       {/* Preview canvas */}
       <div
         className='chromatic-preview flex-1 overflow-y-auto p-6 flex flex-col gap-6 transition-colors duration-300'
+        data-dark={theme.darkMode}
         style={previewStyle}
       >
         {/* Typography */}

@@ -1,22 +1,30 @@
-import type { ChromaticTheme } from '../types';
+import type { ChromaticTheme, SemanticColors } from '../types';
+
+function semanticVars(semantic: SemanticColors): Record<string, string> {
+  return {
+    '--color-primary': semantic.primary,
+    '--color-primary-hover': semantic.primaryHover,
+    '--color-background': semantic.background,
+    '--color-surface': semantic.surface,
+    '--color-text': semantic.text,
+    '--color-text-muted': semantic.textMuted,
+    '--color-border': semantic.border,
+    '--color-error': semantic.error,
+    '--color-warning': semantic.warning,
+    '--color-success': semantic.success,
+  };
+}
+
+function varsToCSS(vars: Record<string, string>): string {
+  return Object.entries(vars)
+    .map(([k, v]) => `  ${k}: ${v};`)
+    .join('\n');
+}
 
 export function injectThemeCSS(theme: ChromaticTheme): void {
   const { colors, typography, spacing, shadows, borderRadius } = theme;
 
-  const vars: Record<string, string> = {
-    // Semantic colors
-    '--color-primary': colors.semantic.primary,
-    '--color-primary-hover': colors.semantic.primaryHover,
-    '--color-background': colors.semantic.background,
-    '--color-surface': colors.semantic.surface,
-    '--color-text': colors.semantic.text,
-    '--color-text-muted': colors.semantic.textMuted,
-    '--color-border': colors.semantic.border,
-    '--color-error': colors.semantic.error,
-    '--color-warning': colors.semantic.warning,
-    '--color-success': colors.semantic.success,
-
-    // Brand scale
+  const sharedVars: Record<string, string> = {
     ...Object.fromEntries(
       Object.entries(colors.brand).map(([k, v]) => [`--color-brand-${k}`, v]),
     ),
@@ -29,22 +37,14 @@ export function injectThemeCSS(theme: ChromaticTheme): void {
         v,
       ]),
     ),
-
-    // Typography
     '--font-sans': typography.fontFamily,
     '--font-mono': typography.monoFamily,
     '--font-size-base': `${typography.baseSize}px`,
-
-    // Spacing
     '--spacing-unit': `${spacing.baseUnit}px`,
-
-    // Shadows
     '--shadow-sm': `0px ${shadows.sm.offsetY} ${shadows.sm.blur} ${shadows.sm.spread} rgba(0,0,0,${shadows.sm.opacity})`,
     '--shadow-md': `0px ${shadows.md.offsetY} ${shadows.md.blur} ${shadows.md.spread} rgba(0,0,0,${shadows.md.opacity})`,
     '--shadow-lg': `0px ${shadows.lg.offsetY} ${shadows.lg.blur} ${shadows.lg.spread} rgba(0,0,0,${shadows.lg.opacity})`,
     '--shadow-xl': `0px ${shadows.xl.offsetY} ${shadows.xl.blur} ${shadows.xl.spread} rgba(0,0,0,${shadows.xl.opacity})`,
-
-    // Border radius
     '--radius-sm': `${borderRadius.sm}px`,
     '--radius-md': `${borderRadius.md}px`,
     '--radius-lg': `${borderRadius.lg}px`,
@@ -59,7 +59,13 @@ export function injectThemeCSS(theme: ChromaticTheme): void {
     document.head.appendChild(styleEl);
   }
 
-  styleEl.textContent = `.chromatic-preview {\n${Object.entries(vars)
-    .map(([k, v]) => `  ${k}: ${v};`)
-    .join('\n')}\n}`;
+  styleEl.textContent = `
+.chromatic-preview {
+${varsToCSS({ ...sharedVars, ...semanticVars(colors.semanticLight) })}
+}
+
+.chromatic-preview[data-dark="true"] {
+${varsToCSS(semanticVars(colors.semanticDark))}
+}
+`.trim();
 }

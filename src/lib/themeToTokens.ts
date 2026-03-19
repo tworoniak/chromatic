@@ -44,8 +44,14 @@ export function themeToTokens(theme: ChromaticTheme): TokenSet {
           { $value: v, $type: 'color' },
         ]),
       ),
-      semantic: Object.fromEntries(
-        Object.entries(colors.semantic).map(([k, v]) => [
+      light: Object.fromEntries(
+        Object.entries(colors.semanticLight).map(([k, v]) => [
+          k,
+          { $value: v, $type: 'color' },
+        ]),
+      ),
+      dark: Object.fromEntries(
+        Object.entries(colors.semanticDark).map(([k, v]) => [
           k,
           { $value: v, $type: 'color' },
         ]),

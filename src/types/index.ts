@@ -90,23 +90,25 @@ export interface ColorScale {
   '800': string;
   '900': string;
 }
+export interface SemanticColors {
+  primary: string;
+  primaryHover: string;
+  background: string;
+  surface: string;
+  text: string;
+  textMuted: string;
+  border: string;
+  error: string;
+  warning: string;
+  success: string;
+}
 
 export interface ThemeColors {
   brand: ColorScale;
   accent: ColorScale;
   neutral: ColorScale;
-  semantic: {
-    primary: string;
-    primaryHover: string;
-    background: string;
-    surface: string;
-    text: string;
-    textMuted: string;
-    border: string;
-    error: string;
-    warning: string;
-    success: string;
-  };
+  semanticLight: SemanticColors;
+  semanticDark: SemanticColors;
 }
 
 export interface ShadowLevel {
