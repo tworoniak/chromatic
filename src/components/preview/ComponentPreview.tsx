@@ -1,5 +1,7 @@
 import type { ChromaticTheme } from '../../types';
 
+import { Sun, Moon } from 'lucide-react';
+
 interface Props {
   theme: ChromaticTheme;
   onDarkMode: (dark: boolean) => void;
@@ -85,7 +87,15 @@ export function ComponentPreview({ theme, onDarkMode }: Props) {
                 : 'bg-white border-zinc-300 text-zinc-700'
             }`}
         >
-          {theme.darkMode ? '☀ Light' : '☾ Dark'}
+          {theme.darkMode ? (
+            <>
+              <Sun size={20} strokeWidth={1} /> Light
+            </>
+          ) : (
+            <>
+              <Moon size={20} strokeWidth={1} /> Dark
+            </>
+          )}
         </button>
       </div>
 
@@ -106,18 +116,19 @@ export function ComponentPreview({ theme, onDarkMode }: Props) {
           <h1
             className='font-bold'
             style={{
-              fontSize: 32,
+              fontSize: 44,
               color: semantic.text,
               lineHeight: theme.typography.lineHeights.tight,
             }}
           >
-            The quick brown fox
+            The quick brown <span style={{ color: semantic.primary }}>fox</span>
           </h1>
           <h2
             className='font-semibold'
             style={{ fontSize: 24, color: semantic.text }}
           >
-            Jumps over the lazy dog
+            Jumps over the{' '}
+            <span style={{ color: theme.colors.accent[500] }}>lazy dog</span>
           </h2>
           <p
             style={{

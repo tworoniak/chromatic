@@ -11,6 +11,8 @@ import { ComponentPreview } from './components/preview/ComponentPreview';
 import { SavedThemes } from './components/SavedThemes';
 import type { OutputFormat } from './types';
 
+import { Undo2, Redo2 } from 'lucide-react';
+
 type ControlTab =
   | 'color'
   | 'typography'
@@ -134,18 +136,18 @@ export default function App() {
           <button
             onClick={undo}
             disabled={!canUndo}
-            className='px-2.5 py-1.5 text-xs text-zinc-500 hover:text-zinc-300 disabled:opacity-30 transition-colors cursor-pointer disabled:cursor-not-allowed'
+            className='px-2.5 py-1.5 text-xs flex items-center gap-1 text-zinc-500 hover:text-zinc-300 disabled:opacity-30 transition-colors cursor-pointer disabled:cursor-not-allowed'
             title='Undo'
           >
-            ↩ Undo
+            <Undo2 strokeWidth={1} /> Undo
           </button>
           <button
             onClick={redo}
             disabled={!canRedo}
-            className='px-2.5 py-1.5 text-xs text-zinc-500 hover:text-zinc-300 disabled:opacity-30 transition-colors cursor-pointer disabled:cursor-not-allowed'
+            className='px-2.5 py-1.5 text-xs flex items-center gap-1 text-zinc-500 hover:text-zinc-300 disabled:opacity-30 transition-colors cursor-pointer disabled:cursor-not-allowed'
             title='Redo'
           >
-            ↪ Redo
+            Redo <Redo2 strokeWidth={1} />
           </button>
           <div className='w-px h-4 bg-zinc-800' />
           <span className='text-xs font-mono text-zinc-600'>
