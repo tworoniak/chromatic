@@ -21,7 +21,10 @@ export function transformValue(
       return pxToRem(resolvedValue);
 
     case 'shadow': {
-      const v = token.$value as ShadowValue;
+      const v: ShadowValue =
+        typeof token.$value === 'object' && token.$value !== null
+          ? (token.$value as ShadowValue)
+          : (JSON.parse(resolvedValue) as ShadowValue);
       return transformShadow(v);
     }
 

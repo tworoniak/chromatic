@@ -64,10 +64,7 @@ export function suggestFix(
 
   // Determine which direction to push lightness
   const { l: otherL } = hexToHSL(otherColor);
-  const shouldDarken =
-    fix.target === 'foreground'
-      ? otherL > 50 // dark text on light bg
-      : otherL > 50; // dark bg so white has contrast
+  const shouldDarken = otherL > 50;
 
   const step = shouldDarken ? -1 : 1;
   let currentL = l;
@@ -112,7 +109,6 @@ export function checkThemeContrast(
 ): ContrastPair[] {
   const accent = theme.colors.accent['500'];
   const accentTextColor = getContrastColor(accent);
-  console.log('accent:', accent, 'accentTextColor:', accentTextColor);
 
   const pairs: Array<{
     id: string;
