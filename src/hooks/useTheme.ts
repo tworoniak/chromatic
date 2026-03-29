@@ -372,6 +372,14 @@ export function useTheme() {
     dispatch({ type: 'SET_THEME', theme: saved.theme });
   }, []);
 
+  const importTheme = useCallback((imported: ChromaticTheme) => {
+    dispatch({ type: 'SET_THEME', theme: imported });
+  }, []);
+
+  const resetTheme = useCallback(() => {
+    dispatch({ type: 'SET_THEME', theme: defaultTheme });
+  }, []);
+
   const deleteSavedTheme = useCallback((id: string) => {
     setSavedThemes((prev) => {
       const next = prev.filter((t) => t.id !== id);
@@ -401,6 +409,8 @@ export function useTheme() {
     canRedo,
     saveTheme,
     loadTheme,
+    importTheme,
+    resetTheme,
     savedThemes,
     deleteSavedTheme,
   };

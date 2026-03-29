@@ -11,7 +11,7 @@ import { ComponentPreview } from './components/preview/ComponentPreview';
 import { SavedThemes } from './components/SavedThemes';
 import type { OutputFormat } from './types';
 
-import { Undo2, Redo2 } from 'lucide-react';
+import { Undo2, Redo2, RotateCcw } from 'lucide-react';
 
 type ControlTab =
   | 'color'
@@ -21,12 +21,14 @@ type ControlTab =
   | 'contrast'
   | 'saved';
 type LeftTab = 'controls' | 'output';
+type OutputTab = OutputFormat | 'json';
 
-const OUTPUT_FORMATS: { id: OutputFormat; label: string }[] = [
+const OUTPUT_TABS: { id: OutputTab; label: string }[] = [
   { id: 'css', label: 'CSS' },
   { id: 'scss', label: 'SCSS' },
   { id: 'typescript', label: 'TypeScript' },
   { id: 'tailwind', label: 'Tailwind' },
+  { id: 'json', label: 'JSON' },
 ];
 
 function highlight(code: string): string {
@@ -70,13 +72,15 @@ export default function App() {
     canRedo,
     saveTheme,
     loadTheme,
+    importTheme,
+    resetTheme,
     savedThemes,
     deleteSavedTheme,
   } = useTheme();
 
   const [leftTab, setLeftTab] = useState<LeftTab>('controls');
   const [controlTab, setControlTab] = useState<ControlTab>('color');
-  const [outputFormat, setOutputFormat] = useState<OutputFormat>('css');
+  const [outputTab, setOutputTab] = useState<OutputTab>('css');
   const [copied, setCopied] = useState(false);
 
   const pipelineResult = useMemo(() => {
@@ -84,7 +88,10 @@ export default function App() {
     return runPipeline(JSON.stringify(tokens, null, 2));
   }, [theme]);
 
-  const outputContent = pipelineResult.output?.[outputFormat] ?? '';
+  const outputContent =
+    outputTab === 'json'
+      ? JSON.stringify(theme, null, 2)
+      : pipelineResult.output?.[outputTab] ?? '';
 
   const highlightedOutput = useMemo(() => highlight(outputContent), [outputContent]);
 
@@ -95,17 +102,21 @@ export default function App() {
   };
 
   const handleDownload = () => {
-    const exts: Record<OutputFormat, string> = {
+    const exts: Record<OutputTab, string> = {
       css: '.css',
       scss: '.scss',
       typescript: '.ts',
       tailwind: '.config.ts',
+      json: '.json',
     };
+    const slug = theme.name.toLowerCase().replace(/\s+/g, '-');
+    const filename =
+      outputTab === 'json' ? `${slug}-theme.json` : `${slug}-tokens${exts[outputTab]}`;
     const blob = new Blob([outputContent], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${theme.name.toLowerCase().replace(/\s+/g, '-')}-tokens${exts[outputFormat]}`;
+    a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -153,6 +164,14 @@ export default function App() {
             title='Redo'
           >
             Redo <Redo2 strokeWidth={1} />
+          </button>
+          <div className='w-px h-4 bg-zinc-800' />
+          <button
+            onClick={resetTheme}
+            className='px-2.5 py-1.5 text-xs flex items-center gap-1 text-zinc-500 hover:text-zinc-300 transition-colors cursor-pointer'
+            title='Reset to default theme'
+          >
+            <RotateCcw size={12} strokeWidth={1.5} /> Reset
           </button>
           <div className='w-px h-4 bg-zinc-800' />
           <span className='text-xs font-mono text-zinc-600'>
@@ -244,6 +263,7 @@ export default function App() {
                     onLoad={loadTheme}
                     onDelete={deleteSavedTheme}
                     onSave={saveTheme}
+                    onImport={importTheme}
                     savedThemes={savedThemes}
                   />
                 )}
@@ -255,13 +275,13 @@ export default function App() {
             <>
               {/* Output format tabs */}
               <div className='flex border-b border-zinc-800 shrink-0'>
-                {OUTPUT_FORMATS.map((fmt) => (
+                {OUTPUT_TABS.map((fmt) => (
                   <button
                     key={fmt.id}
-                    onClick={() => setOutputFormat(fmt.id)}
+                    onClick={() => setOutputTab(fmt.id)}
                     className={`flex-1 py-2 text-[10px] font-semibold uppercase tracking-wider transition-colors cursor-pointer
                       ${
-                        outputFormat === fmt.id
+                        outputTab === fmt.id
                           ? 'text-amber-400 border-b-2 border-amber-500 -mb-px'
                           : 'text-zinc-500 hover:text-zinc-300'
                       }`}
