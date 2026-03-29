@@ -13,13 +13,14 @@ export function themeToTokens(theme: ChromaticTheme): TokenSet {
     };
   });
 
+  // Modular type scale: base sits at index 2, each step multiplies by scaleRatio
   const sizeSteps = ['xs', 'sm', 'base', 'lg', 'xl', '2xl', '3xl', '4xl'];
-  const sizeMultipliers = [0.75, 0.875, 1, 1.125, 1.25, 1.5, 1.875, 2.25];
   const fontSizeTokens: Record<string, { $value: string; $type: 'fontSize' }> =
     {};
   sizeSteps.forEach((step, i) => {
+    const size = typography.baseSize * Math.pow(typography.scaleRatio, i - 2);
     fontSizeTokens[step] = {
-      $value: `${Math.round(typography.baseSize * sizeMultipliers[i])}px`,
+      $value: `${Math.round(size)}px`,
       $type: 'fontSize',
     };
   });

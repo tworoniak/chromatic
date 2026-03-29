@@ -41,7 +41,7 @@ function loadGoogleFont(family: string): void {
   document.head.appendChild(link);
 }
 
-export function useGoogleFonts() {
+export function useGoogleFonts(initialFamily?: string) {
   const [query, setQuery] = useState('');
   const [filtered, setFiltered] = useState(POPULAR_FONTS);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(
@@ -49,8 +49,8 @@ export function useGoogleFonts() {
   );
 
   useEffect(() => {
-    POPULAR_FONTS.forEach((f) => loadGoogleFont(f.family));
-  }, []);
+    if (initialFamily) loadGoogleFont(initialFamily);
+  }, [initialFamily]);
 
   const search = useCallback((q: string) => {
     setQuery(q);

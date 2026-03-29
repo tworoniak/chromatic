@@ -44,66 +44,53 @@ export function generateTypeScript(tokens: TokenSet): string {
 
 export function generateTailwind(tokens: TokenSet): string {
   const flat = flattenTokens(tokens, '', tokens);
-
-  const colors: Record<string, string> = {};
-  const spacing: Record<string, string> = {};
-  const fontSize: Record<string, string> = {};
-  const fontFamily: Record<string, string> = {};
-  const fontWeight: Record<string, string> = {};
-  const lineHeight: Record<string, string> = {};
-  const borderRadius: Record<string, string> = {};
-  const boxShadow: Record<string, string> = {};
-  const transitionDuration: Record<string, string> = {};
+  const lines: string[] = [];
 
   for (const { path, token, resolvedValue } of flat) {
     const value = transformValue(token, resolvedValue);
     const parts = path.split('.');
-    const key = parts.slice(1).join('.');
+    let varName: string | null = null;
 
     switch (token.$type) {
       case 'color':
-        colors[key] = value;
-        break;
-      case 'dimension':
-        if (parts[0] === 'spacing') spacing[parts[1]] = value;
-        if (parts[0] === 'borderRadius') borderRadius[parts[1]] = value;
-        break;
-      case 'fontSize':
-        fontSize[parts[1] ?? parts[0]] = value;
+        // color.brand.500 → --color-brand-500
+        varName = `--color-${parts.slice(1).join('-')}`;
         break;
       case 'fontFamily':
-        fontFamily[parts[1] ?? parts[0]] = value;
+        // fontFamily.sans → --font-sans
+        varName = `--font-${parts[1]}`;
+        break;
+      case 'fontSize':
+        // fontSize.base → --text-base
+        varName = `--text-${parts[1]}`;
         break;
       case 'fontWeight':
-        fontWeight[parts[1] ?? parts[0]] = value;
+        // fontWeight.normal → --font-weight-normal
+        varName = `--font-weight-${parts[1]}`;
         break;
       case 'lineHeight':
-        lineHeight[parts[1] ?? parts[0]] = value;
+        // lineHeight.tight → --leading-tight
+        varName = `--leading-${parts[1]}`;
+        break;
+      case 'dimension':
+        if (parts[0] === 'spacing') {
+          // spacing.4 → --spacing-4
+          varName = `--spacing-${parts[1]}`;
+        } else if (parts[0] === 'borderRadius') {
+          // borderRadius.md → --radius-md
+          varName = `--radius-${parts[1]}`;
+        }
         break;
       case 'shadow':
-        boxShadow[parts[1] ?? parts[0]] = value;
+        // shadow.sm → --shadow-sm
+        varName = `--shadow-${parts[1]}`;
         break;
-      case 'duration':
-        transitionDuration[parts[1] ?? parts[0]] = value;
-        break;
+    }
+
+    if (varName !== null) {
+      lines.push(`  ${varName}: ${value};`);
     }
   }
 
-  const config = {
-    theme: {
-      extend: {
-        colors,
-        spacing,
-        fontSize,
-        fontFamily,
-        fontWeight,
-        lineHeight,
-        borderRadius,
-        boxShadow,
-        transitionDuration,
-      },
-    },
-  };
-
-  return `import type { Config } from 'tailwindcss'\n\nconst config: Config = ${JSON.stringify(config, null, 2)}\n\nexport default config`;
+  return `@import "tailwindcss";\n\n@theme {\n${lines.join('\n')}\n}`;
 }

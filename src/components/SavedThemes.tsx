@@ -1,15 +1,18 @@
-import { useState } from 'react';
-import type { SavedTheme } from '../types';
+import { useRef, useState } from 'react';
+import type { ChromaticTheme, SavedTheme } from '../types';
 
 interface Props {
   onLoad: (theme: SavedTheme) => void;
   onDelete: (id: string) => void;
   onSave: (name: string) => void;
+  onImport: (theme: ChromaticTheme) => void;
   savedThemes: SavedTheme[];
 }
 
-export function SavedThemes({ onLoad, onDelete, onSave, savedThemes }: Props) {
+export function SavedThemes({ onLoad, onDelete, onSave, onImport, savedThemes }: Props) {
   const [name, setName] = useState('');
+  const [importError, setImportError] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSave = () => {
     if (!name.trim()) return;
@@ -19,6 +22,34 @@ export function SavedThemes({ onLoad, onDelete, onSave, savedThemes }: Props) {
 
   const handleDelete = (id: string) => {
     onDelete(id);
+  };
+
+  const handleImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const parsed = JSON.parse(ev.target?.result as string) as ChromaticTheme;
+        if (
+          typeof parsed !== 'object' ||
+          parsed === null ||
+          !('brandColor' in parsed) ||
+          !('colors' in parsed) ||
+          !('typography' in parsed)
+        ) {
+          setImportError('Invalid theme file.');
+          return;
+        }
+        setImportError('');
+        onImport(parsed);
+      } catch {
+        setImportError('Could not parse JSON file.');
+      }
+    };
+    reader.readAsText(file);
+    // Reset input so the same file can be re-imported
+    e.target.value = '';
   };
 
   return (
@@ -39,6 +70,25 @@ export function SavedThemes({ onLoad, onDelete, onSave, savedThemes }: Props) {
         >
           Save
         </button>
+      </div>
+
+      <div className='flex flex-col gap-1'>
+        <input
+          ref={fileInputRef}
+          type='file'
+          accept='.json'
+          className='hidden'
+          onChange={handleImportFile}
+        />
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          className='w-full px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 hover:border-zinc-600 text-zinc-400 text-xs font-medium rounded-lg transition-all cursor-pointer text-left'
+        >
+          Import theme JSON…
+        </button>
+        {importError && (
+          <p className='text-[10px] text-red-400 px-1'>{importError}</p>
+        )}
       </div>
 
       {savedThemes.length === 0 ? (
