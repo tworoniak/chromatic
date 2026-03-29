@@ -1,4 +1,4 @@
-# Chromatic
+# Chromatic v1.0
 
 A visual theme builder that generates fully WCAG-compliant design token sets for light and dark mode. Pick a brand color, choose a harmony type, tune typography and spacing, verify contrast compliance — then export to CSS, SCSS, TypeScript, or Tailwind.
 
