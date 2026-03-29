@@ -19,7 +19,8 @@ function FontPicker({
   onChange: (family: string) => void;
   category: 'sans-serif' | 'serif' | 'monospace';
 }) {
-  const { fonts, query, search, load } = useGoogleFonts();
+  const initialFamily = value.split(',')[0].trim();
+  const { fonts, query, search, load } = useGoogleFonts(initialFamily);
   const filtered = fonts.filter((f) => f.category === category);
 
   return (
