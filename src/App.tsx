@@ -57,6 +57,9 @@ export default function App() {
     setFontFamily,
     setMonoFamily,
     setBaseSize,
+    setScaleRatio,
+    setWeight,
+    setLineHeight,
     setSpacingUnit,
     setShadow,
     setRadius,
@@ -215,6 +218,9 @@ export default function App() {
                     onFontFamily={setFontFamily}
                     onMonoFamily={setMonoFamily}
                     onBaseSize={setBaseSize}
+                    onScaleRatio={setScaleRatio}
+                    onWeight={setWeight}
+                    onLineHeight={setLineHeight}
                   />
                 )}
                 {controlTab === 'spacing' && (

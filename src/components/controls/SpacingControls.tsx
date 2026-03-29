@@ -76,6 +76,32 @@ export function SpacingControls({ theme, onSpacingUnit, onRadius }: Props) {
             />
           </div>
         ))}
+
+        {/* Pill toggle for full radius */}
+        <div className='flex items-center justify-between pt-1'>
+          <div className='flex flex-col gap-0.5'>
+            <span className='text-xs text-zinc-400'>full</span>
+            <span className='text-[10px] text-zinc-600'>Pill-shaped corners</span>
+          </div>
+          <button
+            onClick={() =>
+              onRadius('full', theme.borderRadius.full === 9999 ? 0 : 9999)
+            }
+            className={`relative w-10 h-5 rounded-full transition-colors cursor-pointer border ${
+              theme.borderRadius.full === 9999
+                ? 'bg-violet-600 border-violet-500'
+                : 'bg-zinc-800 border-zinc-700'
+            }`}
+          >
+            <span
+              className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${
+                theme.borderRadius.full === 9999
+                  ? 'translate-x-5'
+                  : 'translate-x-0.5'
+              }`}
+            />
+          </button>
+        </div>
       </div>
     </div>
   );

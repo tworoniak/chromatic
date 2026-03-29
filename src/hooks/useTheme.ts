@@ -35,6 +35,9 @@ type Action =
       key: 'sm' | 'md' | 'lg' | 'xl' | 'full';
       value: number;
     }
+  | { type: 'SET_SCALE_RATIO'; scaleRatio: number }
+  | { type: 'SET_WEIGHT'; key: 'normal' | 'medium' | 'semibold' | 'bold'; value: number }
+  | { type: 'SET_LINE_HEIGHT'; key: 'tight' | 'normal' | 'loose'; value: number }
   | { type: 'SET_THEME'; theme: ChromaticTheme }
   | {
       type: 'SET_SEMANTIC_COLOR';
@@ -104,6 +107,33 @@ function applyAction(theme: ChromaticTheme, action: Action): ChromaticTheme {
       return {
         ...theme,
         typography: { ...theme.typography, baseSize: action.baseSize },
+      };
+
+    case 'SET_SCALE_RATIO':
+      return {
+        ...theme,
+        typography: { ...theme.typography, scaleRatio: action.scaleRatio },
+      };
+
+    case 'SET_WEIGHT':
+      return {
+        ...theme,
+        typography: {
+          ...theme.typography,
+          weights: { ...theme.typography.weights, [action.key]: action.value },
+        },
+      };
+
+    case 'SET_LINE_HEIGHT':
+      return {
+        ...theme,
+        typography: {
+          ...theme.typography,
+          lineHeights: {
+            ...theme.typography.lineHeights,
+            [action.key]: action.value,
+          },
+        },
       };
 
     case 'SET_SPACING_UNIT':
@@ -270,6 +300,23 @@ export function useTheme() {
     [],
   );
 
+  const setScaleRatio = useCallback(
+    (scaleRatio: number) => dispatch({ type: 'SET_SCALE_RATIO', scaleRatio }),
+    [],
+  );
+
+  const setWeight = useCallback(
+    (key: 'normal' | 'medium' | 'semibold' | 'bold', value: number) =>
+      dispatch({ type: 'SET_WEIGHT', key, value }),
+    [],
+  );
+
+  const setLineHeight = useCallback(
+    (key: 'tight' | 'normal' | 'loose', value: number) =>
+      dispatch({ type: 'SET_LINE_HEIGHT', key, value }),
+    [],
+  );
+
   const setSpacingUnit = useCallback(
     (baseUnit: number) => dispatch({ type: 'SET_SPACING_UNIT', baseUnit }),
     [],
@@ -341,6 +388,9 @@ export function useTheme() {
     setFontFamily,
     setMonoFamily,
     setBaseSize,
+    setScaleRatio,
+    setWeight,
+    setLineHeight,
     setSpacingUnit,
     setShadow,
     setRadius,

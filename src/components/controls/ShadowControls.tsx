@@ -53,6 +53,14 @@ export function ShadowControls({ theme, onShadow }: Props) {
                   unit: 'px',
                 },
                 {
+                  field: 'spread' as const,
+                  label: 'Spread',
+                  min: -20,
+                  max: 20,
+                  step: 1,
+                  unit: 'px',
+                },
+                {
                   field: 'opacity' as const,
                   label: 'Opacity',
                   min: 0,
