@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useReducer } from 'react';
+import { useCallback, useEffect, useReducer, useState } from 'react';
 import type {
   ChromaticTheme,
   ThemeHistory,
@@ -183,6 +183,7 @@ function historyReducer(history: ThemeHistory, action: Action): ThemeHistory {
 }
 
 const STORAGE_KEY = 'chromatic-saved-themes';
+const ACTIVE_THEME_KEY = 'chromatic-active-theme';
 
 function loadSavedThemes(): SavedTheme[] {
   try {
@@ -201,20 +202,40 @@ function persistSavedThemes(themes: SavedTheme[]): void {
   }
 }
 
+function loadActiveTheme(): ChromaticTheme {
+  try {
+    const raw = localStorage.getItem(ACTIVE_THEME_KEY);
+    return raw ? (JSON.parse(raw) as ChromaticTheme) : defaultTheme;
+  } catch {
+    return defaultTheme;
+  }
+}
+
 // ─── Hook ───────────────────────────────────────────────────────────────────
 
 export function useTheme() {
-  const [history, dispatch] = useReducer(historyReducer, {
+  const [history, dispatch] = useReducer(historyReducer, undefined, () => ({
     past: [],
-    present: defaultTheme,
+    present: loadActiveTheme(),
     future: [],
-  });
+  }));
 
   const theme = history.present;
+
+  const [savedThemes, setSavedThemes] = useState<SavedTheme[]>(loadSavedThemes);
 
   // Inject CSS whenever theme changes
   useEffect(() => {
     injectThemeCSS(theme);
+  }, [theme]);
+
+  // Persist active (unsaved) theme across page refreshes
+  useEffect(() => {
+    try {
+      localStorage.setItem(ACTIVE_THEME_KEY, JSON.stringify(theme));
+    } catch {
+      // localStorage unavailable
+    }
   }, [theme]);
 
   // Actions
@@ -284,14 +305,17 @@ export function useTheme() {
   // Save / load
   const saveTheme = useCallback(
     (name: string) => {
-      const saved = loadSavedThemes();
       const entry: SavedTheme = {
         id: crypto.randomUUID(),
         name,
         theme: { ...theme, name },
         savedAt: Date.now(),
       };
-      persistSavedThemes([entry, ...saved]);
+      setSavedThemes((prev) => {
+        const next = [entry, ...prev];
+        persistSavedThemes(next);
+        return next;
+      });
       return entry;
     },
     [theme],
@@ -301,13 +325,12 @@ export function useTheme() {
     dispatch({ type: 'SET_THEME', theme: saved.theme });
   }, []);
 
-  const getSavedThemes = useCallback((): SavedTheme[] => {
-    return loadSavedThemes();
-  }, []);
-
   const deleteSavedTheme = useCallback((id: string) => {
-    const saved = loadSavedThemes().filter((t) => t.id !== id);
-    persistSavedThemes(saved);
+    setSavedThemes((prev) => {
+      const next = prev.filter((t) => t.id !== id);
+      persistSavedThemes(next);
+      return next;
+    });
   }, []);
 
   return {
@@ -328,7 +351,7 @@ export function useTheme() {
     canRedo,
     saveTheme,
     loadTheme,
-    getSavedThemes,
+    savedThemes,
     deleteSavedTheme,
   };
 }

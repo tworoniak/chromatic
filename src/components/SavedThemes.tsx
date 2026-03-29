@@ -1,31 +1,24 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { SavedTheme } from '../types';
 
 interface Props {
   onLoad: (theme: SavedTheme) => void;
   onDelete: (id: string) => void;
   onSave: (name: string) => void;
-  getSaved: () => SavedTheme[];
+  savedThemes: SavedTheme[];
 }
 
-export function SavedThemes({ onLoad, onDelete, onSave, getSaved }: Props) {
+export function SavedThemes({ onLoad, onDelete, onSave, savedThemes }: Props) {
   const [name, setName] = useState('');
-  const [saved, setSaved] = useState<SavedTheme[]>([]);
-
-  useEffect(() => {
-    setSaved(getSaved());
-  }, [getSaved]);
 
   const handleSave = () => {
     if (!name.trim()) return;
     onSave(name.trim());
     setName('');
-    setSaved(getSaved());
   };
 
   const handleDelete = (id: string) => {
     onDelete(id);
-    setSaved(getSaved());
   };
 
   return (
@@ -48,13 +41,13 @@ export function SavedThemes({ onLoad, onDelete, onSave, getSaved }: Props) {
         </button>
       </div>
 
-      {saved.length === 0 ? (
+      {savedThemes.length === 0 ? (
         <p className='text-xs text-zinc-600 text-center py-4'>
           No saved themes yet
         </p>
       ) : (
         <div className='flex flex-col gap-1.5'>
-          {saved.map((t) => (
+          {savedThemes.map((t) => (
             <div
               key={t.id}
               className='flex items-center justify-between px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-lg hover:border-zinc-700 transition-colors'

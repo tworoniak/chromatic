@@ -80,7 +80,10 @@ export function flattenTokens(
     const path = prefix ? `${prefix}.${key}` : key;
 
     if (isToken(value)) {
-      const rawValue = String(value.$value);
+      const rawValue =
+        typeof value.$value === 'object' && value.$value !== null
+          ? JSON.stringify(value.$value)
+          : String(value.$value);
       const isAlias = ALIAS_REGEX.test(rawValue);
       try {
         const { resolved } = isAlias

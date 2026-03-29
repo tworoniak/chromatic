@@ -67,7 +67,7 @@ export default function App() {
     canRedo,
     saveTheme,
     loadTheme,
-    getSavedThemes,
+    savedThemes,
     deleteSavedTheme,
   } = useTheme();
 
@@ -82,6 +82,8 @@ export default function App() {
   }, [theme]);
 
   const outputContent = pipelineResult.output?.[outputFormat] ?? '';
+
+  const highlightedOutput = useMemo(() => highlight(outputContent), [outputContent]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(outputContent);
@@ -236,7 +238,7 @@ export default function App() {
                     onLoad={loadTheme}
                     onDelete={deleteSavedTheme}
                     onSave={saveTheme}
-                    getSaved={getSavedThemes}
+                    savedThemes={savedThemes}
                   />
                 )}
               </div>
@@ -288,7 +290,7 @@ export default function App() {
                 <pre className='text-[11px] font-mono leading-relaxed'>
                   <code
                     dangerouslySetInnerHTML={{
-                      __html: highlight(outputContent),
+                      __html: highlightedOutput,
                     }}
                   />
                 </pre>
